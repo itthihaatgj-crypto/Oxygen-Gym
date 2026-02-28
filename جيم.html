@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OXYGEN GYM</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+
+*{font-family:Cairo;margin:0;box-sizing:border-box}
+
+body{
+background:#070b14;
+color:#fff;
+padding-bottom:70px;
+}
+
+/* HEADER */
+header{
+text-align:center;
+padding:15px;
+font-size:26px;
+font-weight:900;
+background:linear-gradient(90deg,#00ffd5,#0066ff);
+}
+
+/* SECTIONS */
+.section{display:none;padding:15px}
+.show{display:block}
+
+/* CARDS */
+.card{
+background:#111827;
+padding:15px;
+border-radius:15px;
+margin-top:12px;
+box-shadow:0 0 15px #00ffd533;
+}
+
+/* INPUT */
+input,select{
+width:100%;
+margin:6px 0;
+padding:10px;
+border-radius:8px;
+border:none;
+}
+
+/* BUTTON */
+button{
+width:100%;
+padding:10px;
+margin-top:6px;
+border:none;
+border-radius:8px;
+background:linear-gradient(45deg,#00ffd5,#0066ff);
+color:white;
+font-weight:bold;
+}
+
+/* TABLE */
+table{width:100%;margin-top:10px;border-collapse:collapse}
+th{background:#00ffd5;color:#000;padding:8px}
+td{background:#fff;color:#000;padding:8px;text-align:center}
+
+/* NAVBAR */
+nav{
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+display:flex;
+background:#111827;
+}
+
+nav button{
+flex:1;
+background:none;
+color:#fff;
+border:none;
+padding:12px;
+font-size:12px;
+}
+
+nav button:hover{background:#00ffd522}
+
+.stat{font-size:18px;margin:6px 0}
+
+</style>
+</head>
+
+<body>
+
+<header>💪 OXYGEN GYM</header>
+
+<!-- DASHBOARD -->
+<div id="home" class="section show">
+<div class="card">
+<h3>📊 الإحصائيات</h3>
+<div class="stat">الأعضاء: <span id="membersCount">0</span></div>
+<div class="stat">الدخل: <span id="income">0</span> جنيه</div>
+<div class="stat">المصروفات: <span id="expensesTotal">0</span></div>
+<div class="stat">💰 صافي: <span id="net">0</span></div>
+</div>
+</div>
+
+<!-- MEMBERS -->
+<div id="members" class="section">
+<div class="card">
+<h3>إضافة عضو</h3>
+<input id="mName" placeholder="الاسم">
+<input id="mPhone" placeholder="رقم الهاتف">
+<input type="number" id="mPrice" placeholder="السعر">
+<button onclick="addMember()">إضافة</button>
+
+<table>
+<thead><tr><th>الاسم</th><th>الهاتف</th><th>السعر</th><th>❌</th></tr></thead>
+<tbody id="membersTable"></tbody>
+</table>
+</div>
+</div>
+
+<!-- ATTENDANCE -->
+<div id="attendance" class="section">
+<div class="card">
+<h3>تسجيل حضور</h3>
+<input id="attName" placeholder="اسم العضو">
+<button onclick="addAttendance()">تسجيل</button>
+<ul id="attList"></ul>
+</div>
+</div>
+
+<!-- FINANCE -->
+<div id="finance" class="section">
+<div class="card">
+<h3>دخل إضافي</h3>
+<input type="number" id="incomeInput">
+<button onclick="addIncome()">إضافة</button>
+
+<h3>مصروف</h3>
+<input type="number" id="expInput">
+<button onclick="addExpense()">إضافة</button>
+</div>
+</div>
+
+<!-- TRAINERS -->
+<div id="trainers" class="section">
+<div class="card">
+<h3>المدربين</h3>
+<input id="trainerName" placeholder="اسم المدرب">
+<button onclick="addTrainer()">إضافة</button>
+<ul id="trainerList"></ul>
+</div>
+</div>
+
+<!-- NOTES -->
+<div id="notes" class="section">
+<div class="card">
+<h3>ملاحظات</h3>
+<textarea id="notesBox" style="width:100%;height:100px"></textarea>
+<button onclick="saveNotes()">حفظ</button>
+</div>
+</div>
+
+<nav>
+<button onclick="openTab('home')">🏠</button>
+<button onclick="openTab('members')">👤</button>
+<button onclick="openTab('attendance')">✅</button>
+<button onclick="openTab('finance')">💰</button>
+<button onclick="openTab('trainers')">🏋️</button>
+<button onclick="openTab('notes')">📝</button>
+</nav>
+
+<script>
+
+let data=JSON.parse(localStorage.getItem("oxygen"))||{
+members:[],attendance:[],income:0,expenses:0,trainers:[]
+};
+
+function save(){localStorage.setItem("oxygen",JSON.stringify(data));update();}
+
+function openTab(id){
+document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
+document.getElementById(id).classList.add('show');
+}
+
+/* MEMBERS */
+function addMember(){
+data.members.push({
+name:mName.value,
+phone:mPhone.value,
+price:+mPrice.value
+});
+mName.value=mPhone.value=mPrice.value="";
+save();
+}
+
+function renderMembers(){
+membersTable.innerHTML="";
+data.members.forEach((m,i)=>{
+membersTable.innerHTML+=`
+<tr>
+<td>${m.name}</td>
+<td>${m.phone}</td>
+<td>${m.price}</td>
+<td><button onclick="data.members.splice(${i},1);save()">❌</button></td>
+</tr>`;
+});
+}
+
+/* ATTENDANCE */
+function addAttendance(){
+data.attendance.push(attName.value);
+attName.value="";
+save();
+}
+
+function renderAttendance(){
+attList.innerHTML="";
+data.attendance.forEach(a=>attList.innerHTML+=`<li>${a}</li>`);
+}
+
+/* FINANCE */
+function addIncome(){data.income+=+incomeInput.value;incomeInput.value="";save();}
+function addExpense(){data.expenses+=+expInput.value;expInput.value="";save();}
+
+/* TRAINERS */
+function addTrainer(){
+data.trainers.push(trainerName.value);
+trainerName.value="";
+save();
+}
+
+function renderTrainers(){
+trainerList.innerHTML="";
+data.trainers.forEach(t=>trainerList.innerHTML+=`<li>${t}</li>`);
+}
+
+/* NOTES */
+function saveNotes(){
+localStorage.setItem("oxygenNotes",notesBox.value);
+}
+
+notesBox.value=localStorage.getItem("oxygenNotes")||"";
+
+/* UPDATE */
+function update(){
+renderMembers();
+renderAttendance();
+renderTrainers();
+
+membersCount.innerText=data.members.length;
+income.innerText=data.income;
+expensesTotal.innerText=data.expenses;
+net.innerText=data.income-data.expenses+
+data.members.reduce((a,b)=>a+b.price,0);
+}
+
+update();
+
+</script>
+
+</body>
+</html>
